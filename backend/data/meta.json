@@ -1,0 +1,17 @@
+{
+  "actuals": {
+    "count": 1584,
+    "start": "2026-01-01 00:00:00+00:00",
+    "end": "2026-02-02 23:30:00+00:00",
+    "source": "Elexon BMRS FUELHH stream (fuelType == WIND)"
+  },
+  "forecasts": {
+    "count": 19856,
+    "publish_start": "2025-12-30 02:30:00+00:00",
+    "publish_end": "2026-02-01 22:30:00+00:00",
+    "target_start": "2025-12-29 21:00:00+00:00",
+    "target_end": "2026-02-03 21:00:00+00:00",
+    "source": "Elexon BMRS WINDFOR stream"
+  },
+  "updated_at": "2026-10-26T09:48:15.267418+00:00"
+}
