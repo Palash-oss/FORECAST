@@ -71,6 +71,7 @@ app.include_router(whatif.router)
 
 
 @app.get("/", tags=["Root"])
+@app.get("/api", tags=["Root"])
 def root_info():
     return {
         "app": settings.app_name,

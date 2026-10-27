@@ -10,6 +10,7 @@ router = APIRouter(tags=["Metadata & System"])
 
 
 @router.get("/health", response_model=HealthResponse)
+@router.get("/api/health", response_model=HealthResponse)
 def get_health(loader: DataLoader = Depends(get_data_loader)):
     act = loader.actuals
     fc = loader.forecasts
