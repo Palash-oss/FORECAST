@@ -10,6 +10,9 @@
 [![Tailwind CSS](https://img.shields.io/badge/TailwindCSS-3.4+-06B6D4?logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
 [![Tests](https://img.shields.io/badge/Tests-14%20Passed-emerald)](backend/tests/)
 
+**Live Application URL**: [https://wind-forecast-desk.vercel.app](https://wind-forecast-desk.vercel.app) *(Replace with your deployed URL)*  
+**Demo Video (Unlisted YouTube)**: [https://youtu.be/your-video-id](https://youtu.be/your-video-id) *(Include link in submission form)*
+
 ---
 
 ## 1. Overview & Trading Context
@@ -100,10 +103,11 @@ flowchart TD
 
 ```text
 weather APP/
+├── .gitignore                            # Comprehensive git ignore for Python, Node, & caches
 ├── backend/
 │   ├── app/
 │   │   ├── config.py                     # App configuration & environment settings
-│   │   ├── main.py                       # FastAPI entrypoint, CORS, exception handlers
+│   │   ├── main.py                       # FastAPI entrypoint, Lifespan precomputation, GZip & cache headers
 │   │   ├── models/
 │   │   │   └── schemas.py                # Typed Pydantic models for all API responses
 │   │   ├── routers/
@@ -114,8 +118,8 @@ weather APP/
 │   │   └── services/
 │   │       ├── buffer.py                 # Empirical reserve buffer calculation
 │   │       ├── data_loader.py            # In-memory snapshot caching service
-│   │       ├── forecast_selection.py     # As-of selection with strict lookahead prevention
-│   │       ├── horizon.py                # Error degradation across 0-48h lead times
+│   │       ├── forecast_selection.py     # As-of selection with strict lookahead prevention & caching
+│   │       ├── horizon.py                # Error degradation across 0-48h lead times with in-memory cache
 │   │       ├── insights.py               # Deterministic template-based plain language insights
 │   │       └── metrics.py                # MAE, RMSE, Bias, shortfall quantiles, nMAE
 │   ├── data/                             # Committed Elexon BMRS snapshots
@@ -141,29 +145,37 @@ weather APP/
 │   │   ├── api/
 │   │   │   ├── client.ts                 # Type-safe API client
 │   │   │   └── types.ts                  # TypeScript interfaces matching backend models
-│   │   ├── components/common/
-│   │   │   ├── MetricCard.tsx            # Animated KPI card with counters & tooltips
-│   │   │   ├── Navbar.tsx                # Header with tabs, global cutoff, & theme switch
-│   │   │   └── SignConventionBadge.tsx   # Interactive error convention tooltip badge
+│   │   ├── components/
+│   │   │   ├── charts/
+│   │   │   │   └── ChartFrame.tsx        # Standardized chart foundation (fixed 320px, margins, shared tooltip)
+│   │   │   ├── common/
+│   │   │   │   ├── MetricCard.tsx        # KPI card with tabular numbers & subtitle metrics
+│   │   │   │   ├── Navbar.tsx            # Header with tab routes, Home link, hover prefetch & settings
+│   │   │   │   └── SignConventionBadge.tsx # Interactive error convention tooltip badge
+│   │   │   └── layout/
+│   │   │       └── DashboardLayout.tsx   # Dashboard shell, URL query param sync, and route Suspense fallback
 │   │   ├── pages/
-│   │   │   ├── AccuracyPage.tsx          # 6 KPIs, daily error trends, error histogram
-│   │   │   ├── DecisionPage.tsx          # As-of forecast vs actuals, buffer band, what-if
-│   │   │   ├── HorizonPage.tsx           # Lead-time degradation curves (0-48h)
-│   │   │   └── TimeOfDayCoveragePage.tsx # Diurnal hour-of-day profile & data audit
+│   │   │   ├── LandingPage.tsx           # Hero landing page, live outturn strip, preview chart, 3-step workflow
+│   │   │   ├── AccuracyPage.tsx          # 6 KPIs, daily error trends, error histogram & quantiles
+│   │   │   ├── DecisionPage.tsx          # As-of forecast vs actuals, buffer band, client-side what-if
+│   │   │   ├── HorizonPage.tsx           # Lead-time degradation curves (0-48h) & bucket cards
+│   │   │   └── TimeOfDayCoveragePage.tsx # Diurnal hour-of-day profile & Elexon dataset audit
 │   │   ├── lib/
-│   │   │   └── utils.ts                  # Classnames & trading number formatters
+│   │   │   ├── chartAxis.ts              # niceMin/niceMax headroom, thousands separators, tick spacing
+│   │   │   ├── insights.ts               # Numerical takeaway generator (strictly factual, no speculative claims)
+│   │   │   └── utils.ts                  # Number & MW formatting utilities
 │   │   ├── styles/
-│   │   │   └── globals.css               # Dark theme, glassmorphism, tabular fonts
-│   │   ├── App.tsx                       # Root component with URL query state sync
+│   │   │   └── globals.css               # Calm institutional design system (Inter, neutral tokens)
+│   │   ├── App.tsx                       # Root router with React.lazy code-splitting and TanStack Query
 │   │   └── main.tsx                      # React root
 │   ├── Dockerfile                        # Multi-stage production Nginx container
 │   ├── nginx.conf                        # Reverse proxy config for containerized frontend
-│   ├── package.json                      # React, Recharts, TanStack Query, Framer Motion
+│   ├── package.json                      # React 19, Recharts, TanStack Query, React Router
 │   ├── tailwind.config.js                # Custom energy terminal color palette
 │   ├── tsconfig.app.json                 # TypeScript compiler configuration
 │   ├── vercel.json                       # Vercel SPA rewrites
 │   └── vite.config.ts                    # Vite dev proxy to backend & path aliases
-├── docker-compose.yml                    # Optional orchestration
+├── docker-compose.yml                    # Docker orchestration
 └── README.md
 ```
 
