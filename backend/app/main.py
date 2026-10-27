@@ -1,7 +1,13 @@
 import logging
+import sys
 from contextlib import asynccontextmanager
+from pathlib import Path
 
-import pandas as pd
+# Guarantee project root is in sys.path
+backend_dir = Path(__file__).resolve().parent.parent
+if str(backend_dir) not in sys.path:
+    sys.path.insert(0, str(backend_dir))
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
@@ -10,14 +16,6 @@ from fastapi.responses import JSONResponse
 from app.config import settings
 from app.routers import accuracy, decision, meta, whatif
 from app.services.data_loader import DataLoader
-from app.services.forecast_selection import select_all_asof_forecasts, select_asof_forecast
-from app.services.horizon import compute_horizon_analysis, get_merged_horizon_df
-from app.services.metrics import (
-    compute_accuracy_summary,
-    compute_by_hour_metrics,
-    compute_daily_metrics,
-    compute_distribution_metrics,
-)
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
 logger = logging.getLogger("wind_trader_api")
@@ -31,28 +29,6 @@ async def lifespan(app: FastAPI):
         logger.info(
             f"Preloaded {len(loader.actuals)} actuals and {len(loader.forecasts)} forecasts."
         )
-
-        # Precompute default 09:00 cutoff data and horizon matrix at startup
-        default_cutoff = settings.default_cutoff_time
-        eval_dates = (
-            pd.date_range(settings.delivery_start_date, settings.delivery_end_date, freq="1D")
-            .strftime("%Y-%m-%d")
-            .tolist()
-        )
-        asof_all = select_all_asof_forecasts(
-            loader.forecasts, loader.actuals, eval_dates, default_cutoff
-        )
-        select_asof_forecast(
-            loader.forecasts, loader.actuals, "2026-01-15", default_cutoff
-        )
-        get_merged_horizon_df(loader.forecasts, loader.actuals)
-        compute_horizon_analysis(loader.forecasts, loader.actuals, 0.0, 48.0)
-        compute_accuracy_summary(asof_all, default_cutoff)
-        compute_daily_metrics(asof_all)
-        compute_by_hour_metrics(asof_all)
-        compute_distribution_metrics(asof_all, 30)
-
-        logger.info("Precomputed default snapshot aggregates and cache warm-up complete.")
     except Exception as exc:
         logger.error(f"Error loading initial dataset snapshots: {exc}", exc_info=True)
     yield

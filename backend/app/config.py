@@ -2,8 +2,23 @@ from pathlib import Path
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+def _find_data_dir() -> Path:
+    candidates = [
+        Path(__file__).resolve().parent.parent / "data",  # backend/data
+        Path(__file__).resolve().parent / "data",         # backend/app/data
+        Path.cwd() / "data",                             # ./data
+        Path.cwd() / "backend" / "data",                 # ./backend/data
+        Path("/var/task/data"),                          # Vercel lambda root
+        Path("/var/task/backend/data"),                  # Vercel lambda with backend
+    ]
+    for c in candidates:
+        if (c / "actuals.csv").exists():
+            return c
+    return Path(__file__).resolve().parent.parent / "data"
+
+
 BASE_DIR = Path(__file__).resolve().parent.parent
-DATA_DIR = BASE_DIR / "data"
+DATA_DIR = _find_data_dir()
 
 
 class Settings(BaseSettings):
